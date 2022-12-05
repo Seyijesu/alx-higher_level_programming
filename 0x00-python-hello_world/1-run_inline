@@ -1,2 +1,2 @@
 #!/ubin/bash
-echo $PYCODE
+echo $PYCODE | python3
