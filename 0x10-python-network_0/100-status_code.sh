@@ -1,3 +1,3 @@
 #!/bin/bash
-#sends a request to a URL and displays only the status code of the response.
-curl -sX HEAD -w "%{http_code}" "$1"
+# send a request and only show the status code
+curl -s -o /dev/null -I --w "%{http_code}" "$1"
