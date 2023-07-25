@@ -1,16 +1,25 @@
 #!/usr/bin/node
+
 const request = require('request');
-const url = process.argv[2];
-const newDict = {};
-request.get(url, function (err, response, body) {
-  if (err == null) {
-    const todos = JSON.parse(body);
-    for (let i = 0; i < todos.length; i++) {
-      if (todos[i].completed === true) {
-        if (newDict[todos[i].userId] === undefined) { newDict[todos[i].userId] = 0; }
-        newDict[todos[i].userId] += 1;
+
+request(process.argv[2], function (err, _res, body) {
+  if (err) {
+    console.log(err);
+  } else {
+    const completedTasksByUsers = {};
+    body = JSON.parse(body);
+
+    for (let i = 0; i < body.length; ++i) {
+      const userId = body[i].userId;
+      const completed = body[i].completed;
+
+      if (completed && !completedTasksByUsers[userId]) {
+        completedTasksByUsers[userId] = 0;
       }
+
+      if (completed) ++completedTasksByUsers[userId];
     }
-    console.log(newDict);
+
+    console.log(completedTasksByUsers);
   }
 });
