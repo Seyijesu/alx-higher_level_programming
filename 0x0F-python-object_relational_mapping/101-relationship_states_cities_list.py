@@ -1,37 +1,27 @@
 #!/usr/bin/python3
-"""Link class to table in database
 """
-import sys
-from sqlalchemy import create_engine
-from model_base import Base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import joinedload
+All states via SQLAlchemy
+"""
+from sys import argv
+from relationship_state import Base, State
 from relationship_city import City
-from relationship_state import State
+from sqlalchemy import (create_engine)
+from sqlalchemy.orm import Session
 
 if __name__ == "__main__":
-    av = sys.argv
-
-    user = av[1]
-    passwd = av[2]
-    db = av[3]
-
-    engine = create_engine(
-        'mysql+mysqldb://{}:{}@localhost/{}'.format(
-            user, passwd, db), pool_pre_ping=True)
-
+    engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'.
+                           format(argv[1], argv[2], argv[3]),
+                           pool_pre_ping=True)
     Base.metadata.create_all(engine)
 
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = Session(engine)
 
-    states = session.query(State).options(
-            joinedload(State.cities)).order_by(State.id)
+    data = session.query(State).order_by(State.id).all()
 
-    for state in states:
-        print("{}: {}".format(state.id, state.name))
+    for row in data:
+        print("{}: {}".format(row.id, row.name))
+        for city in row.cities:
+            print("    {}: {}".format(city.id, city.name))
 
-        for city in state.cities:
-            print("\t{}: {}".format(city.id, city.name))
-
-        session.close()
+    session.commit()
+    session.close()

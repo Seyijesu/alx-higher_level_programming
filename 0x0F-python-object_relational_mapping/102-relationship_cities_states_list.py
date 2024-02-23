@@ -1,35 +1,25 @@
 #!/usr/bin/python3
-"""Link class to table in database
 """
-import sys
+script that lists all City objects
+from the database hbtn_0e_101_usa
+"""
+import sqlalchemy
 from sqlalchemy import create_engine
-from model_base import Base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import joinedload
+from relationship_state import Base, State
 from relationship_city import City
-from relationship_state import State
+from sys import argv
+
 
 if __name__ == "__main__":
-    av = sys.argv
-
-    user = av[1]
-    passwd = av[2]
-    db = av[3]
-
-    engine = create_engine(
-        'mysql+mysqldb://{}:{}@localhost/{}'.format(
-            user, passwd, db), pool_pre_ping=True)
-
+    e = 'mysql+mysqldb://{}:{}@localhost/{}'.format(argv[1],
+                                                    argv[2],
+                                                    argv[3])
+    engine = create_engine(e)
     Base.metadata.create_all(engine)
-
     Session = sessionmaker(bind=engine)
-    session = Session()
-
-    states = session.query(State).options(
-            joinedload(State.cities)).order_by(State.id)
-
-    for state in states:
-        for city in state.cities:
-            print("{}: {} -> {}".format(city.id, city.name, state.name))
-
-        session.close()
+    s = Session()
+    cities = s.query(City).all()
+    for city in cities:
+        print("{}: {} -> {}".format(city.id, city.name, city.state.name))
+    s.close()
